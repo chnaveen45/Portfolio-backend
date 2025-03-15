@@ -9,7 +9,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://naveenchinthala.netlify.app'],
+  origin: ['http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true
@@ -98,18 +98,7 @@ app.post("/Form", async (req, res) => {
   }
 });
 
-app.get("/Display", async (req, res) => {
-  try {
-    // Connect to database first
-    await connectToDatabase();
-    
-    const Display = await Form.find(); // Fetch all documents in the "Form" collection
-    res.json(Display); // Send the data as JSON response
-  } catch (err) {
-    console.error("Error fetching data:", err);
-    res.status(500).json({ message: err.message || "Error fetching data" });
-  }
-});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
