@@ -6,10 +6,11 @@ const cors = require("cors");
 require("dotenv").config(); // Ensure this line loads the .env file
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: ['http://localhost:3000', ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept'],
   credentials: true
@@ -19,26 +20,10 @@ app.use(bodyParser.json());
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI; // or your MongoDB Atlas URI
 
-// Create a connection function that can be called for each request
-let cachedDb = null;
-const connectToDatabase = async () => {
-  if (cachedDb) {
-    return cachedDb;
-  }
-  
-  try {
-    const client = await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    cachedDb = client;
-    console.log('Connected to MongoDB');
-    return client;
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    throw err;
-  }
-};
+// Connect to MongoDB
+mongoose.connect(mongoURI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Mongoose Schema and Model
 const FormSchema = new mongoose.Schema({
@@ -63,24 +48,16 @@ const FormSchema = new mongoose.Schema({
   },
 });
 
-const Form = mongoose.models.Form || mongoose.model("Form", FormSchema);
+const Form = mongoose.model("Form", FormSchema);
 
 // Root endpoint for health check
-app.get("/", async (req, res) => {
-  try {
-    res.status(200).json({ message: "Backend server is running" });
-  } catch (error) {
-    console.error('Error in root endpoint:', error);
-    res.status(500).json({ message: "Server error" });
-  }
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Backend server is running" });
 });
 
 // API Endpoint
 app.post("/Form", async (req, res) => {
   try {
-    // Connect to database first
-    await connectToDatabase();
-    
     const { name, email, message } = req.body;
     console.log("Received form data:", { name, email, message });
 
@@ -98,7 +75,16 @@ app.post("/Form", async (req, res) => {
   }
 });
 
-
+// Display all form submissions
+app.get("/Display", async (req, res) => {
+  try {
+    const Display = await Form.find(); // Fetch all documents in the "Form" collection
+    res.json(Display); // Send the data as JSON response
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    res.status(500).json({ message: err.message || "Error fetching data" });
+  }
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -106,13 +92,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "An error occurred. Please try again." });
 });
 
-// Start the Server only in development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
-
-// Export for Vercel
-module.exports = app;
+// Start the Server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
