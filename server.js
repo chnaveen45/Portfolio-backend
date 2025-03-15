@@ -9,7 +9,11 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://naveenchinthala.netlify.app'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept']
+}));
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -44,10 +48,16 @@ const FormSchema = new mongoose.Schema({
 
 const Form = mongoose.model("Form", FormSchema);
 
+// Root endpoint for health check
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Backend server is running" });
+});
+
 // API Endpoint
 app.post("/Form", async (req, res) => {
   try {
     const { name, email, message } = req.body;
+    console.log("Received form data:", { name, email, message });
 
     if (!name || !email || !message) {
       return res.status(400).json({ message: "All fields are required." });
@@ -69,12 +79,20 @@ app.get("/Display", async (req, res) => {
     res.json(Display); // Send the data as JSON response
   } catch (err) {
     console.error("Error fetching data:", err);
-    res.status(500).send(err.message);
+    res.status(500).json({ message: err.message || "Error fetching data" });
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ message: "An error occurred. Please try again." });
+});
 
 // Start the Server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// Export for Vercel
+module.exports = app;
