@@ -20,8 +20,10 @@ app.use(bodyParser.json());
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI; // or your MongoDB Atlas URI
 
-// Connect to MongoDB
-mongoose.connect(mongoURI)
+mongoose.connect(mongoURI, {
+  serverSelectionTimeoutMS: 30000, // 30 seconds
+  socketTimeoutMS: 45000, // 45 seconds
+})
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
