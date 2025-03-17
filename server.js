@@ -23,6 +23,8 @@ const mongoURI = process.env.MONGO_URI; // or your MongoDB Atlas URI
 mongoose.connect(mongoURI, {
   serverSelectionTimeoutMS: 30000, // 30 seconds
   socketTimeoutMS: 45000, // 45 seconds
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
@@ -77,11 +79,10 @@ app.post("/Form", async (req, res) => {
   }
 });
 
-// Display all form submissions
 app.get("/Display", async (req, res) => {
   try {
-    const Display = await Form.findOne(); 
-    res.json(Display); // Send the data as JSON response
+    const submissions = await Form.find(); // Fetch all documents
+    res.json(submissions); // Send the data as JSON response
   } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).json({ message: err.message || "Error fetching data" });
