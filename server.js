@@ -78,7 +78,7 @@ app.post("/Form", async (req, res) => {
 // Display all form submissions
 app.get("/Display", async (req, res) => {
   try {
-    const Display = await Form.find(); // Fetch all documents in the "Form" collection
+    const Display = await Form.findOne(); // Fetch all documents in the "Form" collection
     res.json(Display); // Send the data as JSON response
   } catch (err) {
     console.error("Error fetching data:", err);
