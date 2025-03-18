@@ -88,7 +88,7 @@ app.get("/Display", async (req, res) => {
     res.status(500).json({ message: err.message || "Error fetching data" });
   }
 });
-
+// the above code is for the form submission and display the data in the database
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
