@@ -52,7 +52,7 @@ const FormSchema = new mongoose.Schema({
   },
 });
 
-const Form = mongoose.model("Form", FormSchema);
+const Form = mongoose.model('Form', FormSchema, "form"); 
 
 // Root endpoint for health check
 app.get("/", (req, res) => {
